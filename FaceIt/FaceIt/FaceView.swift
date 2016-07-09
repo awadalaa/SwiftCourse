@@ -25,12 +25,59 @@ class FaceView: UIView {
         static let SkullRadiusToMouthHeight: CGFloat = 3
         static let SkullRadiusToMouthOffset: CGFloat = 3
     }
+    enum Eye {
+        case Left
+        case Right
+    }
     
-    override func drawRect(rect: CGRect) {
+    private func pathForCicleCenteredAtPoint(midPoint: CGPoint, withRadius: CGFloat) -> UIBezierPath
+    {
+        let path = UIBezierPath(
+            arcCenter: midPoint,
+            radius: withRadius,
+            startAngle: 0.0,
+            endAngle: CGFloat(2 * M_PI),
+            clockwise: false
+        )
+        path.lineWidth = 5.0
 
-        let skull = UIBezierPath(arcCenter: skullCenter, radius: skullRadius, startAngle: 0.0, endAngle: CGFloat(2 * M_PI), clockwise: false)
-        skull.lineWidth = 5.0
+        return path
+    }
+    
+    func getEyeCenter(eye: Eye) -> CGPoint {
+        let eyeOffset = skullRadius / Ratios.SkullRadiusToEyeOffset
+        var eyeCenter = skullCenter
+        eyeCenter.y -= eyeOffset
+        
+        switch eye {
+        case .Left: eyeCenter.x -= eyeOffset
+        case .Right: eyeCenter.x += eyeOffset
+        }
+
+        return eyeCenter
+    }
+    
+    func pathForEye(eye: Eye) -> UIBezierPath {
+        let eyeRadius = skullRadius / Ratios.SkullRadiusToEyeRadius
+        let eyeCenter = getEyeCenter(eye)
+        return pathForCicleCenteredAtPoint(eyeCenter, withRadius: eyeRadius)
+    }
+    
+    func pathForMouth() -> UIBezierPath {
+        let mouthWidth = skullRadius / Ratios.SkullRadiusToMouthWidth
+        let mouthHeight = skullRadius / Ratios.SkullRadiusToMouthHeight
+        let mouthOffset = skullRadius / Ratios.SkullRadiusToMouthOffset
+
+        let mouthRect = CGRect(x: skullCenter.x - mouthWidth/2, y: skullCenter.y + mouthOffset, width: mouthWidth, height: mouthHeight)
+
+        return UIBezierPath(rect: mouthRect)
+    }
+
+    override func drawRect(rect: CGRect) {
         UIColor.blueColor().set()
-        skull.stroke()
+        pathForCicleCenteredAtPoint(skullCenter, withRadius: skullRadius).stroke()
+        pathForEye(.Left).stroke()
+        pathForEye(.Right).stroke()
+        pathForMouth().stroke()
     }
 }
