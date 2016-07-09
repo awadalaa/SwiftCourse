@@ -21,17 +21,21 @@ class CalculatorBrain
         "e": Operation.Constant(M_E),
         "√": Operation.UnaryOperation(sqrt),
         "cos": Operation.UnaryOperation(cos),
-        "×": Operation.BinaryOperation(multiply),
+        "±": Operation.UnaryOperation({ -$0 }),
+        "×": Operation.BinaryOperation({ $0 * $1 }),
+        "÷": Operation.BinaryOperation({ $0 / $1 }),
+        "+": Operation.BinaryOperation({ $0 + $1 }),
+        "−": Operation.BinaryOperation({ $0 - $1 }),
         "=": Operation.Equals
     ]
-
+    
     enum Operation {
         case Constant(Double)
         case UnaryOperation((Double) -> Double)
         case BinaryOperation((Double,Double) -> Double)
         case Equals
     }
-
+    
     private var pending: PendingBinaryOperationInfo?
     struct PendingBinaryOperationInfo {
         var binaryFunction: (Double, Double) -> Double
@@ -45,8 +49,10 @@ class CalculatorBrain
     func performOperation(symbol: String) {
         if let operation = operations[symbol] {
             switch operation {
-            case .Constant(let value): accumulator = value
-            case .UnaryOperation(let fn): accumulator = fn(accumulator)
+            case .Constant(let value):
+                accumulator = value
+            case .UnaryOperation(let fn):
+                accumulator = fn(accumulator)
             case .BinaryOperation(let fn):
                 executePendingBinaryOperation()
                 pending = PendingBinaryOperationInfo(binaryFunction: fn, firstOperand: accumulator)
@@ -60,6 +66,7 @@ class CalculatorBrain
     private func executePendingBinaryOperation() {
         if pending != nil {
             accumulator = pending!.binaryFunction(pending!.firstOperand, accumulator)
+            pending = nil
         }
     }
     
