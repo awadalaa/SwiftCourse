@@ -11,6 +11,14 @@ import UIKit
 class ViewController: UIViewController {
     
     var userIsInTheMiddleOfTyping = false
+    var displayValue: Double {
+        get {
+            return Double(display.text!)!
+        }
+        set {
+            display.text = String(newValue)
+        }
+    }
 
     @IBOutlet weak var display: UILabel!
 
@@ -31,10 +39,11 @@ class ViewController: UIViewController {
         userIsInTheMiddleOfTyping = false
         if let mathematicalSymbol = sender.currentTitle {
             if mathematicalSymbol == "π" {
-                display.text = String(M_PI)
+                displayValue = M_PI
+            } else if mathematicalSymbol == "√" {
+                displayValue = sqrt(displayValue)
             }
         }
-        
     }
 }
 
