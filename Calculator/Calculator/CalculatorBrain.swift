@@ -16,6 +16,7 @@ func multiply(op1:Double, op2:Double) -> Double
 class CalculatorBrain
 {
     private var accumulator = 0.0
+    private var internalProgram = [AnyObject]()
     private var operations: Dictionary<String, Operation> = [
         "π": Operation.Constant(M_PI),
         "e": Operation.Constant(M_E),
@@ -44,6 +45,7 @@ class CalculatorBrain
     
     func setOperand(operand: Double) {
         accumulator = operand
+        internalProgram.append(operand)
     }
     
     func performOperation(symbol: String) {
@@ -68,14 +70,37 @@ class CalculatorBrain
             accumulator = pending!.binaryFunction(pending!.firstOperand, accumulator)
             pending = nil
         }
+    }spo
+    
+    typealias PropertyList = AnyObject
+    var program: PropertyList {
+        get {
+            return internalProgram
+        }
+        set {
+            clear()
+            if let arrayOfOps = newValue as? [AnyObject] {
+                for op in arrayOfOps {
+                    if let operand = op as? Double {
+                        setOperand(operand)
+                    } else if let operand = op as? String {
+                        performOperation(operand)
+                    }
+                }
+            }
+        }
+    }
+    
+    func clear() {
+        accumulator = 0.0
+        pending = nil
+        internalProgram.removeAll()
     }
     
     var result: Double {
         get {
             return accumulator
         }
-        set {
-            
-        }
+        
     }
 }
